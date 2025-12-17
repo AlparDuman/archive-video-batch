@@ -173,7 +173,7 @@ if "!hasVideo!"=="2" (
 
 rem move output to source folder
 if not errorlevel 1 (
-	call :exportFile "!wipExtension!"
+	call :exportFile "!outputExtension!"
 	if "!autoDelete!"=="yes" del "!input!"
 )
 
@@ -206,10 +206,10 @@ exit /b 0
 
 rem convert as video
 :convertVideo
-set "wipExtension=mp4"
+set "outputExtension=mp4"
 
 rem archived already exists
-if exist "!inputDrivePath!!outputName!.!wipExtension!" (
+if exist "!inputDrivePath!!outputName!.!outputExtension!" (
 	echo:EXIST !input!
 	exit /b 0
 )
@@ -232,11 +232,11 @@ set "query=!query! -pix_fmt !pixfmt! -movflags +faststart"
 set "query=-metadata comment="!version! !url! !query!" !query!"
 
 rem convert to temp
-start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!wipExtension!"
+start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
 
 rem error
 if not errorlevel 0 (
-	del "!wip!.!wipExtension!"
+	del "!wip!.!outputExtension!"
 	color 0C
     echo Encoding failed
     pause
@@ -319,18 +319,18 @@ exit /b 0
 rem move convert output to source folder
 :exportFile
 rem prepare variables
-set "wipExtension=%~1"
+set "outputExtension=%~1"
 set "robocopySource=!tempFolder!"
 set "robocopyTarget=!inputDrivePath!"
 if "!robocopySource:~-1!"=="\" set "robocopySource=!robocopySource:~0,-1!"
 if "!robocopyTarget:~-1!"=="\" set "robocopyTarget=!robocopyTarget:~0,-1!"
 
 rem move file
-robocopy "!robocopySource!" "!robocopyTarget!" "!outputName!.!wipExtension!" /MOV /R:3 /W:5 /IS /IT /NFL /NDL /NJH /NJS /NC /NS 2>&1
+robocopy "!robocopySource!" "!robocopyTarget!" "!outputName!.!outputExtension!" /MOV /R:3 /W:5 /IS /IT /NFL /NDL /NJH /NJS /NC /NS 2>&1
 
 rem error
 if not errorlevel 0 (
-	del "!wip!.!wipExtension!"
+	del "!wip!.!outputExtension!"
 	color 0C
     echo Exporting failed
     pause
