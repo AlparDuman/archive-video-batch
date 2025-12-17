@@ -1,6 +1,6 @@
-# Archive Video Batch
+# Archive Media Batch
 
-A windows batch wrapping [FFmpeg](https://www.ffmpeg.org/) to convert videos for archiving using drag & drop.
+A windows batch wrapping [FFmpeg](https://www.ffmpeg.org/) to convert media (music, image, video) for archiving using drag & drop.
 
 > [!WARNING]
 > Output video files only contain video streams and audio streams from the original video file. Subtitles, chapters and all other metadata are therefore not copied!
@@ -17,11 +17,11 @@ The folder containing the FFmpeg.exe and FFprobe.exe files must be included in t
 
 ## Installation
 
-Move the file 'Archive Video.bat' to a location where you can drag and drop the video files you want to convert, such as the desktop.
+Move the file 'Archive Media.bat' to a location where you can drag and drop the video files you want to convert, such as the desktop.
 
 ## Usage
 
-Drag and drop video files or folders containing video files onto this batch file. Please note that Windows has a character limit for drag and drop operations. If you want to process a large number of files, first move them to a folder and then drag that folder onto the batch file.
+Drag and drop media files or folders containing media files onto this batch file. Please note that Windows has a character limit for drag and drop operations. If you want to process a large number of files, first move them to a folder and then drag that folder onto the batch file.
 
 Next, you will be asked to specify whether the script should delete the original video file after successful conversion and which codec should be used for the video. You can select the option that suits your requirements. x264 is recommended for best compatibility with old and new devices and possible licensing requirements with x265 alias hevc.
 
