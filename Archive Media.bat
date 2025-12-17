@@ -58,13 +58,13 @@ set "url=https://github.com/AlparDuman/archive-media-batch"
 set "tempFolder=%TEMP%\github-alparduman-archive-media-batch\"
 
 rem fancy intro :)
-echo:     _             _     _             __  __          _ _       
-echo:    / \   _ __ ___^| ^|__ (_)_   _____  ^|  \/  ^| ___  __^| (_) __ _ 
-echo:   / _ \ ^| '__/ __^| '_ \^| \ \ / / _ \ ^| ^|\/^| ^|/ _ \/ _` ^| ^|/ _` ^|
-echo:  / ___ \^| ^| ^| (__^| ^| ^| ^| ^|\ V /  __/ ^| ^|  ^| ^|  __/ (_^| ^| ^| (_^| ^|
-echo: /_/   \_\_^|  \___^|_^| ^|_^|_^| \_/ \___^| ^|_^|  ^|_^|\___^|\__,_^|_^|\__,_^|
-echo: !version! ========= !url!
-echo:
+echo:    _             _     _             __  __          _ _       
+echo:   / \   _ __ ___^| ^|__ (_)_   _____  ^|  \/  ^| ___  __^| (_) __ _ 
+echo:  / _ \ ^| '__/ __^| '_ \^| \ \ / / _ \ ^| ^|\/^| ^|/ _ \/ _` ^| ^|/ _` ^|
+echo: / ___ \^| ^| ^| (__^| ^| ^| ^| ^|\ V /  __/ ^| ^|  ^| ^|  __/ (_^| ^| ^| (_^| ^|
+echo:/_/   \_\_^|  \___^|_^| ^|_^|_^| \_/ \___^| ^|_^|  ^|_^|\___^|\__,_^|_^|\__,_^|
+echo:!version! ========= !url!
+echo:A wrapper for FFmpeg =================== https://www.ffmpeg.org/
 
 rem create clean temp folder
 if exist "!tempFolder!" rmdir /s /q "!tempFolder!"
@@ -109,6 +109,7 @@ exit /b 0
 
 rem archiving
 :processFile
+echo:
 set "input=%~1"
 set "inputDrivePath=%~dp1"
 set "inputName=%~n1"
@@ -173,8 +174,11 @@ if "!hasVideo!"=="2" (
 
 rem move output to source folder
 if not errorlevel 1 (
-	call :exportFile "!outputExtension!"
-	if "!autoDelete!"=="yes" del "!input!"
+	if exist "!wip!.!outputExtension!" call :exportFile "!outputExtension!"
+	if "!autoDelete!"=="yes" (
+		del "!input!"
+		echo:DELETE !input!
+	)
 )
 
 rem archived
@@ -192,7 +196,7 @@ exit /b 0
 rem convert as animated
 :convertAnimated
 rem WIP
-echo:ANIMATED !input!
+echo:CONVERT IMAGE ANIMATED !input!
 exit /b 0
 
 
@@ -210,12 +214,12 @@ set "outputExtension=mp4"
 
 rem archived already exists
 if exist "!inputDrivePath!!outputName!.!outputExtension!" (
-	echo:EXIST !input!
+	echo:EXIST !inputDrivePath!!outputName!.!outputExtension!
 	exit /b 0
 )
 
 rem announce conversion
-echo:VIDEO !input!
+echo:CONVERT VIDEO !input!
 
 rem support high bit depth
 set "profile=high"
@@ -259,7 +263,7 @@ exit /b 0
 rem convert as transparent
 :convertImageTransparent
 rem WIP
-echo:IMAGE TRANSPARENT !input!
+echo:CONVERT IMAGE TRANSPARENT !input!
 exit /b 0
 
 
@@ -274,7 +278,7 @@ exit /b 0
 rem convert as image
 :convertImage
 rem WIP
-echo:IMAGE !input!
+echo:CONVERT IMAGE !input!
 exit /b 0
 
 
@@ -289,7 +293,7 @@ exit /b 0
 rem convert as music
 :convertMusic
 rem WIP
-echo:MUSIC !input!
+echo:CONVERT MUSIC !input!
 exit /b 0
 
 
@@ -304,7 +308,7 @@ exit /b 0
 rem convert as music with cover
 :convertMusicCover
 rem WIP
-echo:MUSICCOVER !input!
+echo:CONVERT MUSIC COVER !input!
 exit /b 0
 
 
@@ -326,17 +330,18 @@ if "!robocopySource:~-1!"=="\" set "robocopySource=!robocopySource:~0,-1!"
 if "!robocopyTarget:~-1!"=="\" set "robocopyTarget=!robocopyTarget:~0,-1!"
 
 rem move file
-robocopy "!robocopySource!" "!robocopyTarget!" "!outputName!.!outputExtension!" /MOV /R:3 /W:5 /IS /IT /NFL /NDL /NJH /NJS /NC /NS 2>&1
+robocopy "!robocopySource!" "!robocopyTarget!" "!outputName!.!outputExtension!" /MOV /R:3 /W:5 /IS /IT /NFL /NDL /NJH /NJS /NC /NS >nul 2>nul
 
 rem error
 if not errorlevel 0 (
 	del "!wip!.!outputExtension!"
 	color 0C
-    echo Exporting failed
+    echo SAVE !outputName!.!outputExtension!
     pause
 	color 07
     exit /b 1
 )
 
 rem success
+echo:SAVE !inputDrivePath!!outputName!.!outputExtension!
 exit /b 0
