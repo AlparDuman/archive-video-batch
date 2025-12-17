@@ -1,6 +1,6 @@
-# Archival Video Converter Batch
+# Archive Video Batch
 
-A simple windows batch file to convert videos for archiving using drag & drop using [FFmpeg](https://www.ffmpeg.org/).
+A windows batch wrapping [FFmpeg](https://www.ffmpeg.org/) to convert videos for archiving using drag & drop.
 
 > [!WARNING]
 > Output video files only contain video streams and audio streams from the original video file. Subtitles, chapters and all other metadata are therefore not copied!
@@ -17,7 +17,7 @@ The folder containing the FFmpeg.exe and FFprobe.exe files must be included in t
 
 ## Installation
 
-Move the file 'Archival Video Converter.bat' to a location where you can drag and drop the video files you want to convert, such as the desktop.
+Move the file 'Archive Video.bat' to a location where you can drag and drop the video files you want to convert, such as the desktop.
 
 ## Usage
 
