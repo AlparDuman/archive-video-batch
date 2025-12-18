@@ -224,15 +224,33 @@ echo:CONVERT VIDEO !input!
 rem support high bit depth
 set "profile=high"
 set "pixfmt=yuv420p"
-for /f "tokens=*" %%a in ('start "" /b /belownormal /wait ffprobe -v error -select_streams v:0 -show_entries stream^=bits_per_raw_sample -of default^=noprint_wrappers^=1:nokey^=1 "!input!" 2^>nul') do if "%%a"=="10" (
+for /f "tokens=*" %%A in ('start "" /b /belownormal /wait ffprobe -v error -select_streams v:0 -show_entries stream^=bits_per_raw_sample -of default^=noprint_wrappers^=1:nokey^=1 "!input!" 2^>nul') do if "%%A"=="10" (
 	set "profile=high10"
 	set "pixfmt=yuv420p10le"
+)
+
+rem count streams
+set "countAudioStreams=0"
+set "countVideoStreams=0"
+for /f %%C in ('start "" /b /belownormal /wait ffprobe -v error -select_streams a -show_entries stream^=codec_name -of csv^=p^=0 "!input!" 2^>nul ^| find /c /v ""') do (
+	if %%C gtr 0 set "countAudioStreams=%%C"
+)
+for /f %%C in ('start "" /b /belownormal /wait ffprobe -v error -select_streams v -show_entries stream^=codec_name -of csv^=p^=0 "!input!" 2^>nul ^| find /c /v ""') do (
+	if %%C gtr 0 set "countVideoStreams=%%C"
 )
 
 rem prepare query
 set "query=-map 0:v -c:v libx264 -profile:v !profile! -tag:v avc1 -crf 18 -preset placebo -x264-params ref=4:log-level=error -fps_mode cfr -g 60"
 set "query=!query! -map 0:a? -c:a aac -tag:a mp4a -b:a 192k"
 set "query=!query! -pix_fmt !pixfmt! -movflags +faststart"
+for /L %%I in (1,1,!countAudioStreams!) do (
+	set /a "audioIndex=%%~I-1"
+	set "query=!query! -map_metadata:s:a:!audioIndex! 0:s:a:!audioIndex!"
+)
+for /L %%I in (1,1,!countVideoStreams!) do (
+	set /a "audioIndex=%%~I-1"
+	set "query=!query! -map_metadata:s:v:!audioIndex! 0:s:v:!audioIndex!"
+)
 set "query=-metadata comment="!version! !url! !query!" !query!"
 
 rem convert to temp
