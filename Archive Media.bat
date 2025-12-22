@@ -339,8 +339,54 @@ exit /b 0
 
 rem convert as transparent
 :convertImageTransparent
-rem WIP
+set "outputExtension=png"
+
+rem check effective alpha
+set "alphaMean=255"
+set "tempShowInfo=!tempFolder!showInfo.txt"
+ffmpeg -hide_banner -i "!input!" -vf alphaextract,showinfo -frames:v 1 -f null - 1>nul 2>"!tempShowInfo!"
+for /f "usebackq delims=" %%A in ("!tempShowInfo!") do (
+    echo "%%A" | findstr /i "mean" >nul && (
+		for %%B in (%%A) do (
+			echo "%%B" | findstr /i "mean" >nul && (
+				for /f "tokens=1 delims=]" %%C in ("%%B") do (
+					for /f "tokens=2 delims=[" %%D in ("%%C") do (
+						if %%D lss 255 set "alphaMean=%%D"
+					)
+				)
+			)
+		)
+    )
+)
+del !tempShowInfo!
+if !alphaMean! equ 255 goto convertImage
+
+rem archived already exists
+if exist "!inputDrivePath!!outputName!.!outputExtension!" (
+	echo:EXIST !inputDrivePath!!outputName!.!outputExtension!
+	exit /b 0
+)
+
+rem announce conversion
 echo:CONVERT IMAGE TRANSPARENT !input!
+
+rem prepare query
+set "query=-pix_fmt rgba -compression_level 9"
+
+rem convert to temp
+start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
+
+rem error
+if not errorlevel 0 (
+	del "!wip!.!outputExtension!"
+	color 0C
+    echo Encoding failed
+    pause
+	color 07
+    exit /b 1
+)
+
+rem success
 exit /b 0
 
 
@@ -354,8 +400,34 @@ exit /b 0
 
 rem convert as image
 :convertImage
-rem WIP
+set "outputExtension=jpg"
+
+rem archived already exists
+if exist "!inputDrivePath!!outputName!.!outputExtension!" (
+	echo:EXIST !inputDrivePath!!outputName!.!outputExtension!
+	exit /b 0
+)
+
+rem announce conversion
 echo:CONVERT IMAGE !input!
+
+rem prepare query
+set "query=-q:v 1"
+
+rem convert to temp
+start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
+
+rem error
+if not errorlevel 0 (
+	del "!wip!.!outputExtension!"
+	color 0C
+    echo Encoding failed
+    pause
+	color 07
+    exit /b 1
+)
+
+rem success
 exit /b 0
 
 
