@@ -312,7 +312,7 @@ if "!losslessVideo!"=="yes" (
 			set "profile=main444-16-intra"
 			set "pixfmt=yuv444p16le"
 		)
-		set "query=-map 0:v -c:v libx265 -profile:v !profile! -tag:v hvc1 -crf 0 -preset placebo -x265-params lossless=1:ref=4:log-level=error"
+		set "query=-map 0:v -c:v libx265 -profile:v !profile! -tag:v hvc1 -preset placebo -crf 0 -x265-params lossless=1:ref=4:log-level=error"
 	)
 
 	rem if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v hevc_amf -tag:v hvc1 -rc cqp -cqp 0 -quality quality"
@@ -322,7 +322,7 @@ if "!losslessVideo!"=="yes" (
 		set "pixfmt=yuv444p"
 		if "!bitDepth!"=="10" set "pixfmt=p010le"
 		if !bitDepth! geq 12 set "pixfmt=p016le"
-		set "query=-map 0:v -c:v hevc_nvenc -tag:v hvc1 -preset losslesshp -profile:v rext -rc constqp -qp 0 -rc-lookahead 48 -multipass 2 -max_b_frames 4"
+		set "query=-map 0:v -c:v hevc_nvenc -profile:v rext -tag:v hvc1 -preset losslesshp -rc constqp -qp 0 -rc-lookahead 48 -multipass 2 -max_b_frames 4"
 	)
 
 	set "query=!query! -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
@@ -331,28 +331,21 @@ if "!losslessVideo!"=="yes" (
 
 ) else (
 
-	if "!hardwareAcceleration!"=="no" (
-		set "profile=high"
-		set "pixfmt=yuv420p"
-		if !bitDepth! geq 10 (
-			set "profile=high10"
-			set "pixfmt=yuv420p10le"
-		)
-		set "query=-map 0:v -c:v libx264 -profile:v !profile! -tag:v avc1 -crf 18 -qmin 0 -qmax 51 -preset placebo -x264-params ref=4:log-level=error"
-	)
-	
-	rem if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v h264_amf -tag:v avc1 -rc cqp -cqp 18 -quality quality"
-	rem if "!hardwareAcceleration!"=="intel" set "query=-map 0:v -c:v h264_qsv -tag:v avc1 -global_quality 18 -preset 1 -look_ahead 1"
+	set "profile=high"
+	if !bitDepth! geq 10 if not "!hardwareAcceleration!"=="intel" set "profile=high10"
 
-	if "!hardwareAcceleration!"=="nvidia" (
-		set "profile=high"
+	if "!hardwareAcceleration!"=="no" (
+		set "pixfmt=yuv420p"
+		if !bitDepth! geq 10 set "pixfmt=yuv420p10le"
+		set "query=-map 0:v -c:v libx264 -profile:v !profile! -tag:v avc1 -preset placebo -crf 18 -qmin 0 -qmax 51 -x264-params ref=4:log-level=error"
+	) else (
 		set "pixfmt=nv12"
-		if !bitDepth! geq 10 (
-			set "profile=high10"
-			set "pixfmt=p010le"
-		)
-		set "query=-map 0:v -c:v h264_nvenc -tag:v avc1 -cq 18 -preset p7 -profile:v !profile! -rc vbr_hq -qmin 0 -qmax 51 -rc-lookahead 48 -spatial_aq 1 -temporal_aq 1 -aq-strength 15 -multipass 2 -b_ref_mode middle -max_b_frames 4"
+		if !bitDepth! geq 10 if not "!hardwareAcceleration!"=="intel" set "pixfmt=p010le"
 	)
+
+	if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v h264_amf -profile:v !profile! -tag:v avc1 -quality quality -rc cqp -cqp 18"
+	if "!hardwareAcceleration!"=="intel" set "query=-map 0:v -c:v h264_qsv -profile:v !profile! -tag:v avc1 -preset 1 -global_quality 18 -look_ahead 1"
+	if "!hardwareAcceleration!"=="nvidia" set "query=-map 0:v -c:v h264_nvenc -profile:v !profile! -tag:v avc1 -preset p7 -cq 18 -rc vbr_hq -qmin 0 -qmax 51 -rc-lookahead 48 -spatial_aq 1 -temporal_aq 1 -aq-strength 15 -multipass 2 -b_ref_mode middle -max_b_frames 4"
 	
 	set "query=!query! -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
 	set "query=!query! -map 0:a? -c:a aac -tag:a mp4a -b:a 192k"
