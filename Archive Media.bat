@@ -366,9 +366,9 @@ echo:CONVERT IMAGE !input!
 
 rem prepare query
 if "!outputExtension!"=="jpg" (
-	set "query=-pix_fmt yuvj444p -q:v 1 -qmin 1"
+	set "query=-map 0 -map_metadata 0 -pix_fmt yuvj420p -q:v 1 -qmin 1"
 ) else (
-	set "query=-pix_fmt rgba -compression_level 9"
+	set "query=-map 0 -map_metadata 0 -pix_fmt rgba -compression_level 9"
 )
 
 rem convert to temp
