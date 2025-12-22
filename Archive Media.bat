@@ -18,7 +18,7 @@ rem Use a hardware accelerator for
 rem video conversion. Faster
 rem conversion, but lower quality.
 rem no | amd | intel | nvidia
-set "hardwareAcceleration=no"
+set "hardwareAcceleration=nvidia"
 
 rem Enable lossless convertion.
 rem Larger file, but higher quality.
@@ -27,7 +27,7 @@ rem ONLY SUPPORTED BY WEB BROWSERS!
 rem LOSSLESS VIDEO SIZE IS INSANE!
 rem yes | no
 set "losslessAnimated=no"
-set "losslessVideo=no"
+set "losslessVideo=yes"
 set "losslessImage=no"
 set "losslessMusic=no"
 
@@ -300,13 +300,21 @@ if "!losslessVideo!"=="yes" (
 	) else (
 		set "profile=main444-8"
 	)
-	set "query=-map 0:v -c:v libx265 -profile:v !profile! -tag:v hevc -crf 0 -preset placebo -x265-params lossless=1:ref=4:log-level=error -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
+	set "query=-map 0:v -c:v libx265 -profile:v !profile! -tag:v hevc -crf 0 -preset placebo -x265-params lossless=1:ref=4:log-level=error"
+	rem if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v hevc_amf -tag:v hvc1 -rc cqp -cqp 0 -quality quality"
+	rem if "!hardwareAcceleration!"=="intel" set "query=-map 0:v -c:v hevc_qsv -tag:v hvc1 -global_quality 0 -preset 1 -look_ahead 1"
+	if "!hardwareAcceleration!"=="nvidia" set "query=-map 0:v -c:v hevc_nvenc -tag:v hvc1 -preset losslesshp -rc constqp -qp 0 -profile:v main10 -rc-lookahead 48 -multipass 2 -max_b_frames 4"
+	set "query=!query! -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
 	set "query=!query! -map 0:a? -c:a flac -compression_level 12"
 	set "query=!query:#="!"
 
 ) else (
 
-	set "query=-map 0:v -c:v libx264 -profile:v !profile! -tag:v avc1 -crf 18 -preset placebo -x264-params ref=4:log-level=error -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
+	set "query=-map 0:v -c:v libx264 -profile:v !profile! -tag:v avc1 -crf 18 -preset placebo -x264-params ref=4:log-level=error"
+	rem if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v h264_amf -tag:v avc1 -rc cqp -cqp 18 -quality quality"
+	rem if "!hardwareAcceleration!"=="intel" set "query=-map 0:v -c:v h264_qsv -tag:v avc1 -global_quality 18 -preset 1 -look_ahead 1"
+	if "!hardwareAcceleration!"=="nvidia" set "query=-map 0:v -c:v h264_nvenc -tag:v avc1 -cq 18 -preset p7 -rc constqp -qmin 0 -qmax 51 -rc-lookahead 48 -spatial_aq 1 -temporal_aq 1 -aq-strength 15 -multipass 2 -b_ref_mode middle -max_b_frames 4"
+	set "query=!query! -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
 	set "query=!query! -map 0:a? -c:a aac -tag:a mp4a -b:a 192k"
 	set "query=!query:#="!"
 
