@@ -158,17 +158,9 @@ if "!hasVideo!"=="2" (
 	)
 ) else (
 	if "!hasAudio!!hasVideo!"=="01" (
-		if "!hasAlpha!"=="1" (
-			call :convertImageTransparent
-		) else (
-			call :convertImage
-		)
+		call :convertImage
 	) else (
-		if "!hasAudio!!hasVideo!"=="11" (
-			call :convertMusicCover
-		) else (
-			call :convertMusic
-		)
+		call :convertMusic
 	)
 )
 
@@ -337,70 +329,31 @@ exit /b 0
 
 
 
-rem convert as transparent
-:convertImageTransparent
-set "outputExtension=png"
+rem convert as image with effective alpha
+:convertImage
+set "outputExtension=jpg"
 
 rem check effective alpha
-set "alphaMean=255"
-set "tempShowInfo=!tempFolder!showInfo.txt"
-ffmpeg -hide_banner -i "!input!" -vf alphaextract,showinfo -frames:v 1 -f null - 1>nul 2>"!tempShowInfo!"
-for /f "usebackq delims=" %%A in ("!tempShowInfo!") do (
-    echo "%%A" | findstr /i "mean" >nul && (
-		for %%B in (%%A) do (
-			echo "%%B" | findstr /i "mean" >nul && (
-				for /f "tokens=1 delims=]" %%C in ("%%B") do (
-					for /f "tokens=2 delims=[" %%D in ("%%C") do (
-						if %%D lss 255 set "alphaMean=%%D"
+if "!hasAlpha!"=="1" (
+	set "alphaMean=255"
+	set "tempShowInfo=!tempFolder!showInfo.txt"
+	start "" /b /belownormal /wait ffmpeg -hide_banner -i "!input!" -vf alphaextract,showinfo -frames:v 1 -f null - 1>nul 2>"!tempShowInfo!"
+	for /f "usebackq delims=" %%A in ("!tempShowInfo!") do (
+		echo "%%A" | findstr /i "mean" >nul && (
+			for %%B in (%%A) do (
+				echo "%%B" | findstr /i "mean" >nul && (
+					for /f "tokens=1 delims=]" %%C in ("%%B") do (
+						for /f "tokens=2 delims=[" %%D in ("%%C") do (
+							if %%D lss 255 set "alphaMean=%%D"
+						)
 					)
 				)
 			)
 		)
-    )
+	)
+	del !tempShowInfo!
+	if !alphaMean! lss 255 set "outputExtension=png"
 )
-del !tempShowInfo!
-if !alphaMean! equ 255 goto convertImage
-
-rem archived already exists
-if exist "!inputDrivePath!!outputName!.!outputExtension!" (
-	echo:EXIST !inputDrivePath!!outputName!.!outputExtension!
-	exit /b 0
-)
-
-rem announce conversion
-echo:CONVERT IMAGE TRANSPARENT !input!
-
-rem prepare query
-set "query=-pix_fmt rgba -compression_level 9"
-
-rem convert to temp
-start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
-
-rem error
-if not errorlevel 0 (
-	del "!wip!.!outputExtension!"
-	color 0C
-    echo Encoding failed
-    pause
-	color 07
-    exit /b 1
-)
-
-rem success
-exit /b 0
-
-
-
-
-
-
-
-
-
-
-rem convert as image
-:convertImage
-set "outputExtension=jpg"
 
 rem archived already exists
 if exist "!inputDrivePath!!outputName!.!outputExtension!" (
@@ -412,7 +365,11 @@ rem announce conversion
 echo:CONVERT IMAGE !input!
 
 rem prepare query
-set "query=-q:v 1"
+if "!outputExtension!"=="jpg" (
+	set "query=-q:v 1"
+) else (
+	set "query=-pix_fmt rgba -compression_level 9"
+)
 
 rem convert to temp
 start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
@@ -439,25 +396,42 @@ exit /b 0
 
 
 
-rem convert as music
+rem convert as music with optional cover image
 :convertMusic
-rem WIP
+set "outputExtension=mp3"
+
+rem archived already exists
+if exist "!inputDrivePath!!outputName!.!outputExtension!" (
+	echo:EXIST !inputDrivePath!!outputName!.!outputExtension!
+	exit /b 0
+)
+
+rem announce conversion
 echo:CONVERT MUSIC !input!
-exit /b 0
 
+rem prepare query
+set "query=-map 0 -map_metadata 0 -c:a libmp3lame -q:a 0 -id3v2_version 3"
 
+rem embed cover image
+if "!hasVideo!"=="1" (
+	set "query=!query! -metadata:s:v title=#Album cover# -metadata:s:v comment=#Cover (Front)# -c:v mjpeg -q:v 1 -vf #crop='min(in_w\,in_h)':'min(in_w\,in_h)',scale='if(gt(in_w\,3000)\,3000\,in_w)':'if(gt(in_h\,3000)\,3000\,in_h)':flags=lanczos#"
+	set "query=!query:#="!"
+)
 
+rem convert to temp
+start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
 
+rem error
+if not errorlevel 0 (
+	del "!wip!.!outputExtension!"
+	color 0C
+    echo Encoding failed
+    pause
+	color 07
+    exit /b 1
+)
 
-
-
-
-
-
-rem convert as music with cover
-:convertMusicCover
-rem WIP
-echo:CONVERT MUSIC COVER !input!
+rem success
 exit /b 0
 
 
