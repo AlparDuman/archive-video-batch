@@ -355,8 +355,11 @@ rem convert as image with effective alpha
 :convertImage
 set "outputExtension=jpg"
 
+rem override lossy for lossless
+if "!losslessImage!"=="yes" set "outputExtension=png"
+
 rem check effective alpha
-if "!hasAlpha!"=="1" (
+if "!outputExtension!!hasAlpha!"=="jpg1" (
 	set "alphaMean=255"
 	set "tempShowInfo=!tempFolder!showInfo.txt"
 	start "" /b /belownormal /wait ffmpeg -hide_banner -i "!input!" -vf alphaextract,showinfo -frames:v 1 -f null - 1>nul 2>"!tempShowInfo!"
