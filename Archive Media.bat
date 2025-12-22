@@ -18,7 +18,7 @@ rem Use a hardware accelerator for
 rem video conversion. Faster
 rem conversion, but lower quality.
 rem no | amd | intel | nvidia
-set "hardwareAcceleration=no"
+set "hardwareAcceleration=nvidia"
 
 rem Enable lossless convertion.
 rem Larger file, but higher quality.
@@ -351,7 +351,7 @@ if "!losslessVideo!"=="yes" (
 			set "profile=high10"
 			set "pixfmt=p010le"
 		)
-		set "query=-map 0:v -c:v h264_nvenc -tag:v avc1 -cq 18 -preset p7 -profile:v !profile! -rc constqp -qmin 0 -qmax 51 -rc-lookahead 48 -spatial_aq 1 -temporal_aq 1 -aq-strength 15 -multipass 2 -b_ref_mode middle -max_b_frames 4"
+		set "query=-map 0:v -c:v h264_nvenc -tag:v avc1 -cq 18 -preset p7 -profile:v !profile! -rc vbr_hq -qmin 0 -qmax 51 -rc-lookahead 48 -spatial_aq 1 -temporal_aq 1 -aq-strength 15 -multipass 2 -b_ref_mode middle -max_b_frames 4"
 	)
 	
 	set "query=!query! -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
