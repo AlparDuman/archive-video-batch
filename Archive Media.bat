@@ -340,8 +340,8 @@ if "!losslessVideo!"=="yes" (
 		if !bitDepth! geq 10 if not "!hardwareAcceleration!"=="intel" set "pixfmt=p010le"
 	)
 
-	if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v h264_amf -profile:v !profile! -tag:v avc1 -quality quality -rc cqp -cqp 18"
-	if "!hardwareAcceleration!"=="intel" set "query=-map 0:v -c:v h264_qsv -profile:v !profile! -tag:v avc1 -preset 1 -global_quality 18 -look_ahead 1"
+	if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v h264_amf -profile:v !profile! -tag:v avc1 -quality quality -rc cqp -qp_i 18 -qp_p 18 -qp_b 18 -qmin 0 -qmax 51 -max_au_size 0 -g 250 -b 4 -refs 4"
+	if "!hardwareAcceleration!"=="intel" set "query=-map 0:v -c:v h264_qsv -profile:v !profile! -tag:v avc1 -preset veryslow -global_quality 18 -qmin 0 -qmax 51 -look_ahead 1 -global_quality 18 -b 4 -bf 4 -refs 4"
 	if "!hardwareAcceleration!"=="nvidia" set "query=-map 0:v -c:v h264_nvenc -profile:v !profile! -tag:v avc1 -preset p7 -cq 18 -rc vbr_hq -qmin 0 -qmax 51 -rc-lookahead 48 -spatial_aq 1 -temporal_aq 1 -aq-strength 15 -multipass 2 -b_ref_mode middle -max_b_frames 4"
 	
 	set "query=!query! -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
