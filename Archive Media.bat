@@ -338,7 +338,7 @@ if "!losslessVideo!"=="yes" (
 			set "profile=high10"
 			set "pixfmt=yuv420p10le"
 		)
-		set "query=-map 0:v -c:v libx264 -profile:v !profile! -tag:v avc1 -crf 18 -preset placebo -x264-params ref=4:log-level=error"
+		set "query=-map 0:v -c:v libx264 -profile:v !profile! -tag:v avc1 -crf 18 -qmin 0 -qmax 51 -preset placebo -x264-params ref=4:log-level=error"
 	)
 	
 	rem if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v h264_amf -tag:v avc1 -rc cqp -cqp 18 -quality quality"
