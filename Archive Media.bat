@@ -248,10 +248,13 @@ if "!losslessAnimated!"=="yes" (
 	
 	set "filePalette=!tempFolder!palette.png"
 	start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" -vf "scale=iw:ih:flags=lanczos,palettegen=max_colors=256:stats_mode=diff" -y "!filePalette!"
-	set "query=-i #!filePalette!# -i #!input!# -lavfi #scale=iw:ih:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5#"
-	set "query=!query:#="!"
+	set "query=!query! -i #!filePalette!# -i #!input!# -lavfi #scale=iw:ih:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5#"
 
 )
+
+rem add comment
+set "query=-metadata comment=#Made with !version! !url! !query!# !query!"
+set "query=!query:#="!"
 
 rem convert to temp
 start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
@@ -306,6 +309,7 @@ for /f "tokens=*" %%A in ('start "" /b /belownormal /wait ffprobe -v error -sele
 )
 
 rem prepare query
+set "query=-map 0 -map_metadata 0"
 set "profile="
 set "pixfmt="
 if "!losslessVideo!"=="yes" (
@@ -314,7 +318,7 @@ if "!losslessVideo!"=="yes" (
 		set "pixfmt=yuv444p"
 		if "!bitDepth!"=="10" set "pixfmt=p010le"
 		if !bitDepth! geq 12 set "pixfmt=p016le"
-		set "query=-map 0:v -c:v hevc_nvenc -profile:v rext -tag:v hvc1 -preset losslesshp -rc constqp -qp 0 -rc-lookahead 48 -multipass 2 -max_b_frames 4"
+		set "query=!query! -c:v hevc_nvenc -profile:v rext -tag:v hvc1 -preset losslesshp -rc constqp -qp 0 -rc-lookahead 48 -multipass 2 -max_b_frames 4"
 	) else (
 		set "profile=main444-8"
 		set "pixfmt=yuv444p"
@@ -330,12 +334,11 @@ if "!losslessVideo!"=="yes" (
 			set "profile=main444-16-intra"
 			set "pixfmt=yuv444p16le"
 		)
-		set "query=-map 0:v -c:v libx265 -profile:v !profile! -tag:v hvc1 -preset placebo -crf 0 -x265-params lossless=1:ref=4:log-level=error"
+		set "query=!query! -c:v libx265 -profile:v !profile! -tag:v hvc1 -preset placebo -crf 0 -x265-params lossless=1:ref=4:log-level=error"
 	)
 
 	set "query=!query! -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
-	set "query=!query! -map 0:a? -c:a pcm_s32le"
-	set "query=!query:#="!"
+	set "query=!query! -c:a pcm_s32le"
 
 ) else (
 
@@ -345,26 +348,25 @@ if "!losslessVideo!"=="yes" (
 	if "!hardwareAcceleration!"=="no" (
 		set "pixfmt=yuv420p"
 		if !bitDepth! geq 10 set "pixfmt=yuv420p10le"
-		set "query=-map 0:v -c:v libx264 -profile:v !profile! -tag:v avc1 -preset placebo -crf 18 -qmin 0 -qmax 51 -x264-params ref=4:log-level=error"
+		set "query=!query! -c:v libx264 -profile:v !profile! -tag:v avc1 -preset placebo -crf 18 -qmin 0 -qmax 51 -x264-params ref=4:log-level=error"
 	) else (
 		set "pixfmt=nv12"
 		if !bitDepth! geq 10 if not "!hardwareAcceleration!"=="intel" set "pixfmt=p010le"
 	)
 
-	if "!hardwareAcceleration!"=="amd" set "query=-map 0:v -c:v h264_amf -profile:v !profile! -tag:v avc1 -quality quality -rc cqp -qp_i 18 -qp_p 18 -qp_b 18 -qmin 0 -qmax 51 -max_au_size 0 -g 250 -b 4 -refs 4"
-	if "!hardwareAcceleration!"=="intel" set "query=-map 0:v -c:v h264_qsv -profile:v !profile! -tag:v avc1 -preset veryslow -global_quality 18 -qmin 0 -qmax 51 -look_ahead 1 -global_quality 18 -b 4 -bf 4 -refs 4"
-	if "!hardwareAcceleration!"=="nvidia" set "query=-map 0:v -c:v h264_nvenc -profile:v !profile! -tag:v avc1 -preset p7 -cq 18 -rc vbr_hq -qmin 0 -qmax 51 -rc-lookahead 48 -spatial_aq 1 -temporal_aq 1 -aq-strength 15 -multipass 2 -b_ref_mode middle -max_b_frames 4"
+	if "!hardwareAcceleration!"=="amd" set "query=!query! -c:v h264_amf -profile:v !profile! -tag:v avc1 -quality quality -rc cqp -qp_i 18 -qp_p 18 -qp_b 18 -qmin 0 -qmax 51 -max_au_size 0 -g 250 -b 4 -refs 4"
+	if "!hardwareAcceleration!"=="intel" set "query=!query! -c:v h264_qsv -profile:v !profile! -tag:v avc1 -preset veryslow -global_quality 18 -qmin 0 -qmax 51 -look_ahead 1 -global_quality 18 -b 4 -bf 4 -refs 4"
+	if "!hardwareAcceleration!"=="nvidia" set "query=!query! -c:v h264_nvenc -profile:v !profile! -tag:v avc1 -preset p7 -cq 18 -rc vbr_hq -qmin 0 -qmax 51 -rc-lookahead 48 -spatial_aq 1 -temporal_aq 1 -aq-strength 15 -multipass 2 -b_ref_mode middle -max_b_frames 4"
 	
 	set "query=!query! -fps_mode cfr -force_key_frames #expr:gte(t,n_forced*1)#"
-	set "query=!query! -map 0:a? -c:a aac -tag:a mp4a -b:a 192k"
-	set "query=!query:#="!"
+	set "query=!query! -c:a aac -tag:a mp4a -b:a 192k"
 
 )
 
 rem finsih query
-set "query=!query! -map_metadata:g 0:g"
 set "query=!query! -pix_fmt !pixfmt! -movflags +faststart"
-set "query=-metadata comment="Made with !version! !url! !query!" !query!"
+set "query=-metadata comment=#Made with !version! !url! !query!# !query!"
+set "query=!query:#="!"
 
 rem convert to temp
 start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
@@ -430,11 +432,16 @@ rem announce conversion
 echo:CONVERT IMAGE !input!
 
 rem prepare query
+set "query=-map 0 -map_metadata 0"
 if "!outputExtension!"=="jpg" (
-	set "query=-map 0 -map_metadata 0 -pix_fmt yuvj420p -q:v 1 -qmin 1"
+	set "query=!query! -pix_fmt yuvj420p -q:v 1 -qmin 1"
 ) else (
-	set "query=-map 0 -map_metadata 0 -pix_fmt rgba -compression_level 9"
+	set "query=-!query! -pix_fmt rgba -compression_level 9"
 )
+
+rem finsih query
+set "query=-metadata comment=#Made with !version! !url! !query!# !query!"
+set "query=!query:#="!"
 
 rem convert to temp
 start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
@@ -494,6 +501,10 @@ if "!losslessMusic!"=="yes" (
 	)
 
 )
+
+rem finsih query
+set "query=-metadata comment=#Made with !version! !url! !query!# !query!"
+set "query=!query:#="!"
 
 rem convert to temp
 start "" /b /belownormal /wait ffmpeg -hide_banner -y -v error -stats -i "!input!" !query! "!wip!.!outputExtension!"
