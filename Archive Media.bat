@@ -37,13 +37,13 @@ rem source media file after
 rem successful conversion.
 rem THIS WILL DELETE IRREVERSIBLY!
 rem yes | no
-set "autoDelete=no"
+set "autoDelete=yes"
 
 rem =======[ Config Check ]=======
 
 for %%v in (losslessAnimated losslessVideo losslessImage losslessMusic autoDelete) do if /i not "!%%v!"=="yes" set "%%v=no"
 
-echo " no amd intel nvidia " | find " !hardwareAcceleration: =! " >nul
+echo:" no amd intel nvidia " | find " !hardwareAcceleration: =! " >nul
 if errorlevel 1 set "hardwareAcceleration=no"
 
 rem ========[ Config End ]========
@@ -238,7 +238,7 @@ rem announce conversion
 echo:CONVERT ANIMATED !input!
 
 rem prepare query
-set "query=-map 0 -map_metadata 0"
+set "query=-map 0"
 set "filePalette="
 if "!losslessAnimated!"=="yes" (
 
@@ -265,10 +265,10 @@ rem error
 if not errorlevel 0 (
 	del "!wip!.!outputExtension!"
 	color 0C
-    echo Encoding failed
-    pause
+	echo:Encoding failed
+	pause
 	color 07
-    exit /b 1
+	exit /b 1
 )
 
 rem success
@@ -376,10 +376,10 @@ rem error
 if not errorlevel 0 (
 	del "!wip!.!outputExtension!"
 	color 0C
-    echo Encoding failed
-    pause
+	echo:Encoding failed
+	pause
 	color 07
-    exit /b 1
+	exit /b 1
 )
 
 rem success
@@ -407,9 +407,9 @@ if "!outputExtension!!hasAlpha!"=="jpg1" (
 	set "tempShowInfo=!tempFolder!showInfo.txt"
 	start "" /b /belownormal /wait ffmpeg -hide_banner -i "!input!" -vf alphaextract,showinfo -frames:v 1 -f null - 1>nul 2>"!tempShowInfo!"
 	for /f "usebackq delims=" %%A in ("!tempShowInfo!") do (
-		echo "%%A" | findstr /i "mean" >nul && (
+		echo:"%%A" | findstr /i "mean" >nul && (
 			for %%B in (%%A) do (
-				echo "%%B" | findstr /i "mean" >nul && (
+				echo:"%%B" | findstr /i "mean" >nul && (
 					for /f "tokens=1 delims=]" %%C in ("%%B") do (
 						for /f "tokens=2 delims=[" %%D in ("%%C") do (
 							if %%D lss 255 set "alphaMean=%%D"
@@ -451,10 +451,10 @@ rem error
 if not errorlevel 0 (
 	del "!wip!.!outputExtension!"
 	color 0C
-    echo Encoding failed
-    pause
+	echo:Encoding failed
+	pause
 	color 07
-    exit /b 1
+	exit /b 1
 )
 
 rem success
@@ -514,10 +514,10 @@ rem error
 if not errorlevel 0 (
 	del "!wip!.!outputExtension!"
 	color 0C
-    echo Encoding failed
-    pause
+	echo:Encoding failed
+	pause
 	color 07
-    exit /b 1
+	exit /b 1
 )
 
 rem success
@@ -548,10 +548,10 @@ rem error
 if not errorlevel 0 (
 	del "!wip!.!outputExtension!"
 	color 0C
-    echo SAVE !outputName!.!outputExtension!
-    pause
+	echo:SAVE !outputName!.!outputExtension!
+	pause
 	color 07
-    exit /b 1
+	exit /b 1
 )
 
 rem success
