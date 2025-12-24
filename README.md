@@ -1,32 +1,19 @@
 # Archive Media Batch
-
 A windows batch wrapping [FFmpeg](https://www.ffmpeg.org/) to convert media (music, image, video) for archiving using drag & drop.
 
 > [!WARNING]
-> Output video files only contain video streams and audio streams from the original video file. Subtitles, chapters and all other metadata are therefore not copied!
-
-| Table of Contents |
-| - |
-| [Dependency](#dependency) |
-| [Installation](#installation) |
-| [Usage](#usage) |
-
-## Dependency
-
-The folder containing the FFmpeg.exe and FFprobe.exe files must be included in the environment variables. These can be downloaded [here](https://www.ffmpeg.org/download.html). The file FFmpeg.exe must be compiled with aac, libx264, libx265, h264_nvenc, hevc_nvenc, h264_amf, hevc_amf, h264_qsv & hevc_qsv.
-
-## Installation
-
-Move the file 'Archive Media.bat' to a location where you can drag and drop the video files you want to convert, such as the desktop.
-
-## Usage
-
-Drag and drop media files or folders containing media files onto this batch file. Please note that Windows has a character limit for drag and drop operations. If you want to process a large number of files, first move them to a folder and then drag that folder onto the batch file.
-
-Next, you will be asked to specify whether the script should delete the original video file after successful conversion and which codec should be used for the video. You can select the option that suits your requirements. x264 is recommended for best compatibility with old and new devices and possible licensing requirements with x265 alias hevc.
+> 1. Not all metadata are copied to the resulting media files.
+> 2. Lossy may result in a reduction in quality and bit depth.
+> 3. Lossless uses less common codecs.
 
 > [!NOTE]
-> Windows will warn you about running this batch file because it comes from a source that is not trusted or verified. This is a good security check. If you don't trust my batch file, open it with a text editor and you can read the entire code. If you want to remove the notification, you must create a new file and copy the contents of my batch file into yours. This way, the file is created by you and Windows is happy once again. However, only do this if you trust the code!
+> Hardware accelerated, truly lossless video encoding is only available on Nvidia.
 
-> [!WARNING]
-> The encoder options for AMD hardware acceleration are untested, as I don't have an AMD GPU to test them on :)
+## Dependency
+The folder containing the FFmpeg.exe and FFprobe.exe files must be included in the environment variables. These can be downloaded [here](https://www.ffmpeg.org/download.html). The file FFmpeg.exe must be compiled with aac, flac, pcm_s32le, libx264, h264_amf, h264_qsv, h264_nvenc, libx265, hevc_amf, hevc_qsv & hevc_nvenc.
+
+## Setup
+Move the Archive Media.bat file to a location of your choice, such as the desktop. To enable advanced features, open the batch file in a text editor and follow the configuration instructions at the beginning of the file.
+
+## Usage
+Drag and drop small quantities of files onto this batch file. If there are a large number of files, place them in a folder and then drag this folder onto the batch file.
