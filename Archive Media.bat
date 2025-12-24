@@ -396,10 +396,11 @@ exit /b 0
 
 rem convert as image with effective alpha
 :convertImage
-set "outputExtension=jpg"
-
-rem override lossy for lossless
-if "!losslessImage!"=="yes" set "outputExtension=png"
+if "!losslessImage!"=="yes" (
+	set "outputExtension=png"
+) else (
+	set "outputExtension=jpg"
+)
 
 rem check effective alpha
 if "!outputExtension!!hasAlpha!"=="jpg1" (
