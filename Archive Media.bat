@@ -88,6 +88,18 @@ echo:/_/   \_\_^|  \___^|_^| ^|_^|_^| \_/ \___^| ^|_^|  ^|_^|\___^|\__,_^|_^|\__
 echo:!version! ========= !url!
 echo:A wrapper for FFmpeg =================== https://www.ffmpeg.org/
 
+rem check dependencies
+for %%d in (ffmpeg ffprobe) do where %%d >nul 2>&1 || (
+	color 0C
+	echo.
+	echo:No %%d.exe installation found:
+	echo:1^) Download from https://www.ffmpeg.org/download.html
+	echo:2^) Move the file %%d.exe to a folder of your choice.
+	echo:3^) Add this folder containing %%d.exe to the environment variables.
+	pause
+	exit 1
+)
+
 rem create clean temp folder
 if exist "!tempFolder!" rmdir /s /q "!tempFolder!"
 mkdir "!tempFolder!"
