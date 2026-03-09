@@ -6,9 +6,6 @@ A windows batch wrapping [FFmpeg](https://www.ffmpeg.org/) to convert media (mus
 > 2. Lossy may result in a reduction in quality and bit depth.
 > 3. Lossless uses less common codecs.
 
-> [!IMPORTANT]
-> Untested AMD hardware accelerated
-
 > [!NOTE]
 > Hardware accelerated, truly lossless video encoding is only available on Nvidia.
 
